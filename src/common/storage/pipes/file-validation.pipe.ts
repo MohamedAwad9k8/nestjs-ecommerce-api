@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { UploadFileTypesEnum } from '../enums/valid-upload-file-types.enum';
+import { UploadFileTypesEnum } from '../enums/valid-upload-extensions.enums';
 
 export type FileValidationOptions = {
   required: boolean;

@@ -1,18 +1,18 @@
 import slugify from 'slugify';
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './schemas/category.schema';
 import { CreateCategoryDto } from './dtos/requests/create-category.dto';
 import { UpdateCategoryDto } from './dtos/requests/update-category.dto';
-import { ApiFeatures } from 'src/common/api-features/api-features.service';
 import { GetAllResults } from 'src/common/api-features/api-features.types';
 import { CategoryApiFeaturesDto } from './dtos/requests/category-api-features.dto';
 import { StorageService } from 'src/common/storage/storage.service';
+import { CategoryRepository } from './repositories/category.repository';
+import { CategoryDtoMapper } from './mappers/category-dto.mapper';
+import { CategoryResponseDto } from './dtos/responses/category-response.dto';
+import { QueryObjDtoMapper } from './mappers/query-dto.mapper';
+import { CategoryModel } from './models/category.model';
 
 @Injectable()
 export class CategoriesService {
@@ -20,94 +20,68 @@ export class CategoriesService {
     private readonly storageService: StorageService,
     @InjectModel(Category.name)
     private categoryModel: Model<Category>,
+    private readonly categoryRepository: CategoryRepository,
   ) {}
 
   async findAll(
-    queryObj: CategoryApiFeaturesDto,
-  ): Promise<GetAllResults<Category>> {
-    // Build Query
-    const documentsCount = await this.categoryModel.countDocuments();
-    const apiFeatures = new ApiFeatures<Category>(
-      this.categoryModel.find(),
-      queryObj,
-    )
-      .paginate(documentsCount)
-      .search(this.categoryModel.modelName)
-      .limitFields()
-      .sort();
-
-    // Execute Query
-    const { mongooseQuery, paginationResult } = apiFeatures;
-    const documents: Category[] = (await mongooseQuery).map((doc) =>
-      doc.toObject(),
-    );
-    return {
-      results: documents.length,
+    queryObjDto: CategoryApiFeaturesDto,
+  ): Promise<GetAllResults<CategoryResponseDto>> {
+    // Map Query Obj from Dto to Model
+    const QueryObjModel = QueryObjDtoMapper.dtoToModel(queryObjDto);
+    // Use Repository To Get Data
+    const { paginationResult, models } =
+      await this.categoryRepository.findAll(QueryObjModel);
+    // Change Model to Response DTO
+    const cleanedResult = {
+      results: models.length,
       paginationResult,
-      data: documents,
+      data: models.map((doc: CategoryModel) =>
+        CategoryDtoMapper.modelToResponseDto(doc),
+      ),
     };
+    // Return Response
+    return cleanedResult;
   }
 
-  async findOneById(id: string): Promise<Category> {
-    // 1) Find the Category by ID
-    const document = (await this.categoryModel.findById(id))?.toObject();
-    // 2) If Not Found, Throw Error
-    if (!document) {
-      throw new NotFoundException('Category not found');
-    }
-    // 3) Return the Found Category
-    return document;
+  async findOneById(id: string): Promise<CategoryResponseDto> {
+    // Use Repository To Get Data
+    const category = await this.categoryRepository.findOneById(id);
+    // Change Model to Response DTO
+    const responseDto = CategoryDtoMapper.modelToResponseDto(category);
+    // Return Response
+    return responseDto;
   }
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    // 1) Change DTO to Entity
-    const newCategory = this.dtoToEntity(createCategoryDto);
-
-    // 2) Make Sure Name doesn't Exist in the Database
-    if (await this.isCategoryNameExists(newCategory.name ?? null)) {
-      throw new ConflictException('Category with this name already exists');
-    }
-
-    // 3) Create the Category
-    const createdCategory = (
-      await this.categoryModel.create(newCategory)
-    ).toObject();
-
-    // 4) Return the Created Category
-    return createdCategory;
+  async create(
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<CategoryResponseDto> {
+    // Map DTO to Model
+    const model = CategoryDtoMapper.dtoToModel(createCategoryDto);
+    // Use Repository to Create Record in DB
+    const category = await this.categoryRepository.createOne(model);
+    // Map Result to Response DTO
+    const result = CategoryDtoMapper.modelToResponseDto(category);
+    // Return Response
+    return result;
   }
 
   async updateById(
     id: string,
     updateCategoryDto: UpdateCategoryDto,
-  ): Promise<Category> {
-    // 1) Change DTO to Entity
-    const updatedCategory: Partial<Category> =
-      this.dtoToEntity(updateCategoryDto);
-
-    // 2) Make Sure Name doesn't Exist in the Database
-    if (await this.isCategoryNameExists(updatedCategory.name ?? null)) {
-      throw new ConflictException('Category with this name already exists');
-    }
-
-    // 3) Update the Category
-    const updatedCategoryDoc = (
-      await this.categoryModel.findByIdAndUpdate(id, updatedCategory, {
-        new: true,
-      })
-    )?.toObject();
-
-    // 4) If Not Found, Throw Error
-    if (!updatedCategoryDoc) {
-      throw new NotFoundException('Category not found');
-    }
-    // 5) Return the Updated Category
-    return updatedCategoryDoc;
+  ): Promise<CategoryResponseDto> {
+    // Map DTO to Model
+    const model = CategoryDtoMapper.dtoToModel(updateCategoryDto);
+    // Use Repository to Update Record in DB
+    const category = await this.categoryRepository.updateOneById(id, model);
+    // Map Result to Response DTO
+    const result = CategoryDtoMapper.modelToResponseDto(category);
+    // Return Response
+    return result;
   }
 
   async removeById(id: string): Promise<void> {
-    // Delete the Category by ID
-    await this.categoryModel.findByIdAndDelete(id);
+    // Use Repository To Delete Record
+    await this.categoryRepository.deleteById(id);
   }
 
   async uploadCategoryImage(file: Express.Multer.File): Promise<string> {

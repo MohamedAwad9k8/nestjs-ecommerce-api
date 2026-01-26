@@ -22,7 +22,7 @@ import { CategoryApiFeaturesDto } from './dtos/requests/category-api-features.dt
 import { GetAllDto } from './dtos/responses/get-all.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/common/storage/pipes/file-validation.pipe';
-import { UploadFileTypesEnum } from 'src/common/storage/enums/valid-upload-file-types.enum';
+import { UploadFileTypesEnum } from 'src/common/storage/enums/valid-upload-extensions.enums';
 
 @Controller('categories')
 export class CategoriesController {
@@ -37,22 +37,12 @@ export class CategoriesController {
   async findAll(@Query() queryObj: CategoryApiFeaturesDto): Promise<GetAllDto> {
     // Log Incoming Request
     this.logger.log('Fetching all categories');
-    this.logger.debug(`Query Parameters: ${JSON.stringify(queryObj)}`);
 
-    // Get raw result from service
+    // Get results from service
     const result = await this.categoriesService.findAll(queryObj);
 
-    // Transform each category to DTO
-    const transformedData = result.data.map(
-      (category) => new CategoryResponseDto(category),
-    );
-
-    // Return Response in DTO Format
-    return {
-      results: result.results,
-      paginationResult: result.paginationResult,
-      data: transformedData,
-    };
+    // Return Response
+    return result;
   }
 
   @Get(':id')
@@ -62,11 +52,11 @@ export class CategoriesController {
     // Log Incoming Request
     this.logger.log(`Fetching category with ID: ${id}`);
 
-    // Get raw result from service
+    // Get result from service
     const category = await this.categoriesService.findOneById(id);
 
-    // Return Response in DTO Format
-    return new CategoryResponseDto(category);
+    // Return Response
+    return category;
   }
 
   @Post('')
@@ -98,11 +88,11 @@ export class CategoriesController {
       createCategoryDto.image = imageUrl;
     }
 
-    // Get raw result from create service
+    // Get Result From Service
     const newCategory = await this.categoriesService.create(createCategoryDto);
 
-    // Return Response in DTO Format
-    return new CategoryResponseDto(newCategory);
+    // Return Response
+    return newCategory;
   }
 
   @Put(':id')
@@ -135,14 +125,14 @@ export class CategoriesController {
       updateCategoryDto.image = imageUrl;
     }
 
-    // Get raw result from service
+    // Get Result From Service
     const updatedCategory = await this.categoriesService.updateById(
       id,
       updateCategoryDto,
     );
 
-    // Return Response in DTO Format
-    return new CategoryResponseDto(updatedCategory);
+    // Return Response
+    return updatedCategory;
   }
 
   @Delete(':id')
@@ -151,7 +141,7 @@ export class CategoriesController {
     // Log Incoming Request
     this.logger.log(`Deleting category with ID: ${id}`);
 
-    // Get raw result from service
+    // Service Deletes Record
     await this.categoriesService.removeById(id);
   }
 }

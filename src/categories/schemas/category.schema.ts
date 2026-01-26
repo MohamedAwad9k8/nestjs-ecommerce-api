@@ -12,6 +12,9 @@ export class Category {
 
   @Prop({ type: String })
   image?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
