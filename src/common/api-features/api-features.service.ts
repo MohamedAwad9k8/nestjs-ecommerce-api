@@ -1,10 +1,7 @@
 import { Query, HydratedDocument } from 'mongoose';
-import {
-  QueryObject,
-  SearchQuery,
-  PaginationResult,
-} from './api-features.types';
+import { QueryObject, SearchQuery } from './types/api-features.types';
 
+import { PaginationResult } from './types/pagination-results.types';
 export class ApiFeatures<T> {
   paginationResult: PaginationResult;
 

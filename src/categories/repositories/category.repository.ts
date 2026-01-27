@@ -5,7 +5,7 @@ import { Category } from '../schemas/category.schema';
 import { CategoryModel } from '../models/category.model';
 import { ApiFeatures } from 'src/common/api-features/api-features.service';
 import { CategoryRepositoryMapper } from '../mappers/category-repository.mapper';
-import { QueryObjModel } from '../models/query.model';
+import { QueryObjModel } from '../../common/api-features/models/query.model';
 
 export type CategoryDocument = HydratedDocument<Category>;
 
@@ -33,6 +33,14 @@ export class CategoryRepository {
       return false;
     }
     const exists = await this.categoryModel.exists({ name });
+    return !!exists;
+  }
+  // Check if a category ID exists
+  async isCategoryIDExists(id: string): Promise<boolean> {
+    if (id === '') {
+      return false;
+    }
+    const exists = await this.categoryModel.exists({ _id: id });
     return !!exists;
   }
   // Get total documents count

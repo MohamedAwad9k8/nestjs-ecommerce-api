@@ -1,25 +1,19 @@
-import slugify from 'slugify';
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
-import { Category } from './schemas/category.schema';
-import { CreateCategoryDto } from './dtos/requests/create-category.dto';
-import { UpdateCategoryDto } from './dtos/requests/update-category.dto';
-import { GetAllResults } from 'src/common/api-features/api-features.types';
-import { CategoryApiFeaturesDto } from './dtos/requests/category-api-features.dto';
+import { CreateCategoryDto } from '../dtos/requests/create-category.dto';
+import { UpdateCategoryDto } from '../dtos/requests/update-category.dto';
+import { GetAllResults } from 'src/common/api-features/types/pagination-results.types';
+import { CategoryApiFeaturesDto } from '../../common/api-features/dtos/requests/category-api-features.dto';
 import { StorageService } from 'src/common/storage/storage.service';
-import { CategoryRepository } from './repositories/category.repository';
-import { CategoryDtoMapper } from './mappers/category-dto.mapper';
-import { CategoryResponseDto } from './dtos/responses/category-response.dto';
-import { QueryObjDtoMapper } from './mappers/query-dto.mapper';
-import { CategoryModel } from './models/category.model';
+import { CategoryRepository } from '../repositories/category.repository';
+import { CategoryDtoMapper } from '../mappers/category-dto.mapper';
+import { CategoryResponseDto } from '../dtos/responses/category-response.dto';
+import { QueryObjDtoMapper } from '../../common/api-features/mappers/query-dto.mapper';
+import { CategoryModel } from '../models/category.model';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     private readonly storageService: StorageService,
-    @InjectModel(Category.name)
-    private categoryModel: Model<Category>,
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
@@ -84,6 +78,7 @@ export class CategoriesService {
     await this.categoryRepository.deleteById(id);
   }
 
+  // Handling Category Image Upload
   async uploadCategoryImage(file: Express.Multer.File): Promise<string> {
     // Use Storage Service to Process and Store the Image
     const fileName = await this.storageService.processImage({
@@ -96,25 +91,5 @@ export class CategoriesService {
 
     // Return the Stored Image Filename or URL
     return fileName;
-  }
-
-  //Helper Method To Convert DTO to Entity
-  dtoToEntity(dto: CreateCategoryDto | UpdateCategoryDto): Partial<Category> {
-    const result: Partial<Category> = { ...dto };
-
-    if (dto.name) {
-      result.slug = slugify(dto.name, { lower: true });
-    }
-
-    return result;
-  }
-
-  //Helper Method To Check Existing Category By Name
-  async isCategoryNameExists(name: string | null): Promise<boolean> {
-    if (!name) {
-      return false;
-    }
-    const existingCategory = await this.categoryModel.findOne({ name });
-    return !!existingCategory;
   }
 }

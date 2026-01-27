@@ -5,7 +5,7 @@ import { CategoryDocument } from '../repositories/category.repository';
 export class CategoryRepositoryMapper {
   static schemaToModel(category: CategoryDocument): CategoryModel {
     return new CategoryModel({
-      id: category._id.toString(),
+      id: category._id?.toString(),
       name: category.name,
       slug: category.slug,
       image: category.image,

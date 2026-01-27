@@ -12,14 +12,14 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CategoriesService } from './categories.service';
-import { CreateCategoryDto } from './dtos/requests/create-category.dto';
-import { UpdateCategoryDto } from './dtos/requests/update-category.dto';
+import { CategoriesService } from '../services/categories.service';
+import { CreateCategoryDto } from '../dtos/requests/create-category.dto';
+import { UpdateCategoryDto } from '../dtos/requests/update-category.dto';
 import { Logger } from '@nestjs/common';
-import { MongoIDValidationPipe } from '../common/pipes/mongo-id-validation.pipe';
-import { CategoryResponseDto } from './dtos/responses/category-response.dto';
-import { CategoryApiFeaturesDto } from './dtos/requests/category-api-features.dto';
-import { GetAllDto } from './dtos/responses/get-all.dto';
+import { MongoIDValidationPipe } from '../../common/pipes/mongo-id-validation.pipe';
+import { CategoryResponseDto } from '../dtos/responses/category-response.dto';
+import { CategoryApiFeaturesDto } from '../../common/api-features/dtos/requests/category-api-features.dto';
+import { GetAllDto } from '../../common/api-features/dtos/responses/get-all.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/common/storage/pipes/file-validation.pipe';
 import { UploadFileTypesEnum } from 'src/common/storage/enums/valid-upload-extensions.enums';
@@ -34,7 +34,9 @@ export class CategoriesController {
   ) {}
 
   @Get('')
-  async findAll(@Query() queryObj: CategoryApiFeaturesDto): Promise<GetAllDto> {
+  async findAll(
+    @Query() queryObj: CategoryApiFeaturesDto,
+  ): Promise<GetAllDto<CategoryResponseDto>> {
     // Log Incoming Request
     this.logger.log('Fetching all categories');
 
