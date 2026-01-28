@@ -16,7 +16,7 @@ import { UpdateSubCategoryDto } from '../dtos/requests/update-sub-category.dto';
 import { Logger } from '@nestjs/common';
 import { MongoIDValidationPipe } from '../../common/pipes/mongo-id-validation.pipe';
 import { SubCategoryResponseDto } from '../dtos/responses/sub-category-response.dto';
-import { CategoryApiFeaturesDto } from '../../common/api-features/dtos/requests/category-api-features.dto';
+import { apiPaginationFeaturesDto } from '../../common/api-features/dtos/requests/api-pagination-features.dto';
 import { GetAllDto } from '../../common/api-features/dtos/responses/get-all.dto';
 
 @Controller('subcategories')
@@ -30,7 +30,7 @@ export class SubCategoriesController {
 
   @Get('')
   async findAll(
-    @Query() queryObj: CategoryApiFeaturesDto,
+    @Query() queryObj: apiPaginationFeaturesDto,
   ): Promise<GetAllDto<SubCategoryResponseDto>> {
     // Log Incoming Request
     this.logger.log('Fetching all subCategories');

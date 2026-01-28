@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, Body, Query } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { SubCategoriesService } from '../services/sub-categories.service';
 import { NestedRouteDto } from '../dtos/requests/sub-category-nested-routes.dto';
-import { CategoryApiFeaturesDto } from '../../common/api-features/dtos/requests/category-api-features.dto';
+import { apiPaginationFeaturesDto } from '../../common/api-features/dtos/requests/api-pagination-features.dto';
 import { MongoIDValidationPipe } from '../../common/pipes/mongo-id-validation.pipe';
 
 @Controller('categories/:categoryId/subcategories') // nested routes
@@ -13,7 +13,7 @@ export class SubCategoryNestedRoutesController {
   // GET /categories/:categoryId/subcategories
   @Get()
   async findAllByCategory(
-    @Query() queryObj: CategoryApiFeaturesDto,
+    @Query() queryObj: apiPaginationFeaturesDto,
     @Param('categoryId', MongoIDValidationPipe) categoryId: string,
   ) {
     // Log Incoming Request

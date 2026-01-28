@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
-export class CategoryApiFeaturesDto {
+export class apiPaginationFeaturesDto {
   @IsOptional()
   @Type(() => Number)
   @Transform(({ value }): number =>

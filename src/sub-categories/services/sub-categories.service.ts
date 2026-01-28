@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSubCategoryDto } from '../dtos/requests/create-sub-category.dto';
 import { UpdateSubCategoryDto } from '../dtos/requests/update-sub-category.dto';
 import { GetAllResults } from 'src/common/api-features/types/pagination-results.types';
-import { CategoryApiFeaturesDto } from '../../common/api-features/dtos/requests/category-api-features.dto';
+import { apiPaginationFeaturesDto } from '../../common/api-features/dtos/requests/api-pagination-features.dto';
 import { SubCategoryRepository } from '../repositories/sub-category.repository';
 import { CategoryRepository } from '../../categories/repositories/category.repository';
 import { SubCategoryDtoMapper } from '../mappers/sub-category-dto.mapper';
@@ -19,7 +19,7 @@ export class SubCategoriesService {
   ) {}
 
   async findAll(
-    queryObjDto: CategoryApiFeaturesDto,
+    queryObjDto: apiPaginationFeaturesDto,
     filterByCategory?: string,
   ): Promise<GetAllResults<SubCategoryResponseDto>> {
     // Map Query Obj from Dto to Model

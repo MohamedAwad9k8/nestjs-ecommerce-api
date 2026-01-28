@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongodbModule } from './mongodb/mongodb.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
+import { BrandsModule } from './brands/brands.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
     MongodbModule,
     CategoriesModule,
     SubCategoriesModule,
+    BrandsModule,
   ],
   controllers: [],
   providers: [

@@ -30,8 +30,8 @@ export class SubCategoryRepository {
 
   // Helper Functions
 
-  // Check if a category name exists
-  async isCategoryNameExists(name: string): Promise<boolean> {
+  // Check if a sub-category name exists
+  async isSubCategoryNameExists(name: string): Promise<boolean> {
     if (name === '') {
       return false;
     }
@@ -97,7 +97,7 @@ export class SubCategoryRepository {
   // Create Single Record
   async createOne(model: SubCategoryModel): Promise<SubCategoryModel> {
     // 1) Ensure name doesn't exist
-    if (await this.isCategoryNameExists(model.name ?? '')) {
+    if (await this.isSubCategoryNameExists(model.name ?? '')) {
       throw new ConflictException('SubCategory with this name already exists');
     }
 
@@ -118,7 +118,7 @@ export class SubCategoryRepository {
   ): Promise<SubCategoryModel> {
     // 1) Check for name uniqueness
     if (model.name) {
-      if (await this.isCategoryNameExists(model.name ?? '')) {
+      if (await this.isSubCategoryNameExists(model.name ?? '')) {
         throw new ConflictException(
           'SubCategory with this name already exists',
         );
