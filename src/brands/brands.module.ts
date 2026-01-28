@@ -12,5 +12,6 @@ import { Brand, BrandSchema } from './schemas/brand.schema';
   ],
   controllers: [BrandsController],
   providers: [BrandsService, BrandRepository, StorageService],
+  exports: [BrandRepository],
 })
 export class BrandsModule {}

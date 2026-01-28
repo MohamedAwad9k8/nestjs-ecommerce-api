@@ -64,7 +64,7 @@ export class BrandsController {
   @Post('')
   @UseInterceptors(FileInterceptor('image'))
   async create(
-    @Body() createBrandyDto: CreateBrandDto,
+    @Body() createBrandDto: CreateBrandDto,
     @UploadedFile(
       new FileValidationPipe({
         required: true,
@@ -86,12 +86,12 @@ export class BrandsController {
       // Get photo url or path after uploading to storage (e.g., local, S3, etc.)
       const imageUrl = await this.brandsService.uploadBrandImage(image);
 
-      // Attach imageUrl to createBrandyDto
-      createBrandyDto.image = imageUrl;
+      // Attach imageUrl to createBrandDto
+      createBrandDto.image = imageUrl;
     }
 
     // Get Result From Service
-    const newCategory = await this.brandsService.create(createBrandyDto);
+    const newCategory = await this.brandsService.create(createBrandDto);
 
     // Return Response
     return newCategory;

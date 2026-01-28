@@ -16,5 +16,6 @@ import { SubCategoryNestedRoutesController } from './controllers/sub-category-ne
   ],
   controllers: [SubCategoriesController, SubCategoryNestedRoutesController],
   providers: [SubCategoriesService, SubCategoryRepository],
+  exports: [SubCategoryRepository],
 })
 export class SubCategoriesModule {}

@@ -7,6 +7,7 @@ import { MongodbModule } from './mongodb/mongodb.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { BrandsModule } from './brands/brands.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { BrandsModule } from './brands/brands.module';
     CategoriesModule,
     SubCategoriesModule,
     BrandsModule,
+    ProductsModule,
   ],
   controllers: [],
   providers: [
