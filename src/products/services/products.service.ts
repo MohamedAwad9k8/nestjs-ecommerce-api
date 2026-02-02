@@ -33,6 +33,16 @@ export class ProductsService {
     // Use Repository To Get Data
     const { paginationResult, models } =
       await this.productRepository.findAll(QueryObjModel);
+    // Validate and Enrich Embedded Entities
+    await Promise.all(
+      models.map((product) =>
+        Promise.all([
+          this.validateAndEnrichCategory(product),
+          this.validateAndEnrichSubCategories(product),
+          this.validateAndEnrichBrand(product),
+        ]),
+      ),
+    );
     // Change Model to Response DTO
     const cleanedResult = {
       results: models.length,
@@ -48,6 +58,12 @@ export class ProductsService {
   async findOneById(id: string): Promise<ProductResponseDto> {
     // Use Repository To Get Data
     const product = await this.productRepository.findOneById(id);
+    // Validate and Enrich Embedded Entities
+    await Promise.all([
+      this.validateAndEnrichCategory(product),
+      this.validateAndEnrichSubCategories(product),
+      this.validateAndEnrichBrand(product),
+    ]);
     // Change Model to Response DTO
     const responseDto = ProductDtoMapper.modelToResponseDto(product);
     // Return Response
@@ -61,6 +77,12 @@ export class ProductsService {
     const model = ProductDtoMapper.dtoToModel(createCategoryDto);
     // Use Repository to Create Record in DB
     const product = await this.productRepository.createOne(model);
+    // Validate and Enrich Embedded Entities
+    await Promise.all([
+      this.validateAndEnrichCategory(product),
+      this.validateAndEnrichSubCategories(product),
+      this.validateAndEnrichBrand(product),
+    ]);
     // Map Result to Response DTO
     const result = ProductDtoMapper.modelToResponseDto(product);
     // Return Response
@@ -75,6 +97,11 @@ export class ProductsService {
     const model = ProductDtoMapper.dtoToModel(updateCategoryDto);
     // Use Repository to Update Record in DB
     const product = await this.productRepository.updateOneById(id, model);
+    await Promise.all([
+      this.validateAndEnrichCategory(product),
+      this.validateAndEnrichSubCategories(product),
+      this.validateAndEnrichBrand(product),
+    ]);
     // Map Result to Response DTO
     const result = ProductDtoMapper.modelToResponseDto(product);
     // Return Response
@@ -143,15 +170,23 @@ export class ProductsService {
     }
   }
 
-  // Handling Category Image Upload
-  async uploadCategoryImage(file: Express.Multer.File): Promise<string> {
+  // Handling Multiple Product Images Upload
+  async uploadProductImagesMultiple(
+    files: Express.Multer.File[],
+  ): Promise<string[]> {
+    if (!files || files.length === 0) return [];
+
+    return Promise.all(files.map((file) => this.uploadProductImages(file)));
+  }
+  // Handling Product Images Upload
+  async uploadProductImages(file: Express.Multer.File): Promise<string> {
     // Use Storage Service to Process and Store the Image
     const fileName = await this.storageService.processImage({
       file,
       dirName: 'products',
-      width: 600,
-      height: 600,
-      quality: 90,
+      width: 2000,
+      height: 1333,
+      quality: 98,
     });
 
     // Return the Stored Image Filename or URL

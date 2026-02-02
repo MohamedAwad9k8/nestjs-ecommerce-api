@@ -37,6 +37,7 @@ export class ProductDtoMapper {
   }
 
   static modelToResponseDto(model: ProductModel): ProductResponseDto {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     return {
       id: model.id!,
       title: model.title!,
@@ -54,9 +55,13 @@ export class ProductDtoMapper {
 
       colors: model.colors,
 
-      imageCover: model.imageCover!,
+      imageCover: model.imageCover
+        ? `${baseUrl}/uploads/products/${model.imageCover}`
+        : undefined,
 
-      images: model.images,
+      images: model.images?.map(
+        (image) => `${baseUrl}/uploads/products/${image}`,
+      ),
 
       category: EmbeddedEntityMapper.modelToDto(model.category!),
 

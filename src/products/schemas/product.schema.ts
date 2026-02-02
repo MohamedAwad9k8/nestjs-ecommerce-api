@@ -45,14 +45,12 @@ export class Product {
   @Prop({
     type: [Types.ObjectId],
     ref: 'SubCategory',
-    required: true,
   })
   subCategories: Types.ObjectId[];
 
   @Prop({
     type: Types.ObjectId,
     ref: 'Brand',
-    required: true,
   })
   brand: Types.ObjectId;
 

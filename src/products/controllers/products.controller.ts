@@ -9,7 +9,7 @@ import {
   HttpCode,
   Query,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
@@ -20,7 +20,7 @@ import { MongoIDValidationPipe } from '../../common/pipes/mongo-id-validation.pi
 import { ProductResponseDto } from '../dtos/responses/product-response.dto';
 import { apiPaginationFeaturesDto } from '../../common/api-features/dtos/requests/api-pagination-features.dto';
 import { GetAllDto } from '../../common/api-features/dtos/responses/get-all.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/common/storage/pipes/file-validation.pipe';
 import { UploadFileTypesEnum } from 'src/common/storage/enums/valid-upload-extensions.enums';
 
@@ -62,33 +62,44 @@ export class ProductsController {
   }
 
   @Post('')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'imageCover', maxCount: 1 },
+      { name: 'images', maxCount: 5 },
+    ]),
+  )
   async create(
     @Body() createProductDto: CreateProductDto,
-    // @UploadedFile(
-    //   new FileValidationPipe({
-    //     required: true,
-    //     maxSizeMB: 2,
-    //     allowedTypes: [
-    //       UploadFileTypesEnum.JPEG,
-    //       UploadFileTypesEnum.PNG,
-    //       UploadFileTypesEnum.WEBP,
-    //     ],
-    //   }),
-    // )
-    // image: Express.Multer.File,
+    @UploadedFiles(
+      new FileValidationPipe({
+        required: false, // allow no file
+        maxSizeMB: 2,
+        allowedTypes: [
+          UploadFileTypesEnum.JPEG,
+          UploadFileTypesEnum.PNG,
+          UploadFileTypesEnum.WEBP,
+        ],
+      }),
+    )
+    files: {
+      imageCover?: Express.Multer.File[];
+      images?: Express.Multer.File[];
+    },
   ): Promise<ProductResponseDto> {
     // Log Incoming Request
     this.logger.log('Creating a new brand');
 
-    // Process uploaded image if exists
-    // if (image) {
-    //   // Get photo url or path after uploading to storage (e.g., local, S3, etc.)
-    //   const imageUrl = await this.productsService.uploadBrandImage(image);
+    // Single cover image
+    if (files.imageCover?.length) {
+      createProductDto.imageCover =
+        await this.productsService.uploadProductImages(files.imageCover[0]);
+    }
 
-    //   // Attach imageUrl to createProductDto
-    //   createProductDto.imageCover = imageUrl;
-    // }
+    // Multiple images
+    if (files.images?.length) {
+      createProductDto.images =
+        await this.productsService.uploadProductImagesMultiple(files.images);
+    }
 
     // Get Result From Service
     const newProduct = await this.productsService.create(createProductDto);
@@ -98,34 +109,45 @@ export class ProductsController {
   }
 
   @Put(':id')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'imageCover', maxCount: 1 },
+      { name: 'images', maxCount: 5 },
+    ]),
+  )
   async update(
     @Param('id', MongoIDValidationPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
-    // @UploadedFile(
-    //   new FileValidationPipe({
-    //     required: false,
-    //     maxSizeMB: 2,
-    //     allowedTypes: [
-    //       UploadFileTypesEnum.JPEG,
-    //       UploadFileTypesEnum.PNG,
-    //       UploadFileTypesEnum.WEBP,
-    //     ],
-    //   }),
-    // )
-    // image: Express.Multer.File,
+    @UploadedFiles(
+      new FileValidationPipe({
+        required: false, // allow no file
+        maxSizeMB: 2,
+        allowedTypes: [
+          UploadFileTypesEnum.JPEG,
+          UploadFileTypesEnum.PNG,
+          UploadFileTypesEnum.WEBP,
+        ],
+      }),
+    )
+    files: {
+      imageCover?: Express.Multer.File[];
+      images?: Express.Multer.File[];
+    },
   ): Promise<ProductResponseDto> {
     // Log Incoming Request
     this.logger.log(`Updating brand with ID: ${id}`);
 
-    // Process uploaded image if exists
-    // if (image) {
-    //   // Get photo url or path after uploading to storage (e.g., local, S3, etc.)
-    //   const imageUrl = await this.productsService.uploadBrandImage(image);
+    // Single cover image
+    if (files.imageCover?.length) {
+      updateProductDto.imageCover =
+        await this.productsService.uploadProductImages(files.imageCover[0]);
+    }
 
-    //   // Attach imageUrl to updateBrandDto
-    //   updateBrandDto.image = imageUrl;
-    // }
+    // Multiple images
+    if (files.images?.length) {
+      updateProductDto.images =
+        await this.productsService.uploadProductImagesMultiple(files.images);
+    }
 
     // Get Result From Service
     const updatedProduct = await this.productsService.updateById(
